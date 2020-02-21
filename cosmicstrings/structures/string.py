@@ -1,3 +1,5 @@
+import code
+
 
 class CString:
 
@@ -16,12 +18,56 @@ class CString:
                 break
             self._step(next_item)
 
+    def build_su2_string(self):
+        next_item = self._current.get_connections()
+        #print(next_item)
+        if all([i is not None for i in next_item]):
+            self._loop = True
+
+        while True:
+            select = None
+            for i in next_item:
+                if i is None or i in self._map:
+                    continue
+                else:
+                    select = i
+            if select is None:
+                break
+            self._step(select)
+            next_item = self._current.get_connections()
+
+    def old_build_su2_string(self):
+        next_item = self._current.get_connections()
+        if next_item[0] is None:
+            s = 1
+            end = None
+        elif next_item[1] is None:
+            s = 0
+            end = None
+        else:
+            s = 0
+            print("LOOP")
+            self._loop == True
+            end = next_item[s^1]
+
+        while True:
+            it = next_item[s]
+            print("\nOPTIONS:", next_item)
+            print("SELECT:", hex(id(it)))
+            input()
+            if it is end:
+                print("BROKE")
+                break
+            self._step(it)
+            next_item = self._current.get_connections()
+            s ^= 1
+
     def _step(self, next_item):
         self._map.append(next_item)
         self._current = next_item
 
     def draw(self, ax, c='r', alpha=0.5, **kwargs):
-        x, y, z = self.get_coords()
+        x, y, z = self.get_plot_coords()
         ax.plot(x, y, z, c=c, alpha=alpha, **kwargs)
 
     def is_loop(self):
@@ -30,13 +76,28 @@ class CString:
     def get_map(self):
         return self._map
 
-    def get_coords(self):
+    def get_plot_coords(self):
         X, Y, Z = [], [], []
         _map = self._map
         if self._loop:
             _map = [*_map, _map[0]]
+        else:
+            _map = _map[:-1]
+            x, y, z = _map[0].pos
+            X.append(x)
+            Y.append(y)
+            Z.append(z)
         for i in _map:
-            x, y, z = i.pos
+            #parent_c = i.get_parent_center()
+            parent_c = i.pos
+            if parent_c is None:
+                continue
+            x, y, z = parent_c
+            X.append(x)
+            Y.append(y)
+            Z.append(z)
+        if not self._loop:
+            x, y, z = self._map[-1].pos
             X.append(x)
             Y.append(y)
             Z.append(z)
@@ -64,9 +125,8 @@ class CString:
         return CStringL(self, b)
 
     def __len__(self):
-        l = len(self._map)
-        if not self._loop:
-            l -= 1
+        """ DODGY -- works when reading from text file; investigate why if you have time """
+        l = len(self._map) - 1
         return l
 
     def __eq__(self, other):
@@ -74,6 +134,10 @@ class CString:
             return True
         else:
             return False
+
+    def __str__(self):
+        t = 'closed' if self._loop else 'open'
+        return "{} with length {}".format(t, len(self))  
 
 
 class CStringL(CString):

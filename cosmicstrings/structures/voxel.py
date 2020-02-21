@@ -10,12 +10,14 @@ class Voxel:
             [0, 2, 3, 1],  # x0        4
             [4, 6, 7, 5]]  # x1        5
 
-    def __init__(self, pos):
+    def __init__(self, pos, su2):
         self.pos = pos
         self.sides = []
 
         self._verts = []
         self._string_sides = []
+
+        self.su2 = su2
 
     @property
     def verts(self):
@@ -37,15 +39,10 @@ class Voxel:
             loc = [(corners[2].pos[i] - corners[0].pos[i]) / 2.0 + corners[0].pos[i] for i in range(3)]
             s = sides.get(str(loc))
             if s is None:
-                s = VSide(corners, loc)
+                s = VSide(corners, loc, self.su2)
                 sides[str(loc)] = s
             s.add_parent(self, id % 2, id)
             self.sides.append(s)
-
-        #for i, side in zip(range(6), self.sides):
-        #    print("\nid = ", i , " -- ", side)
-        #    for j in side._corners:
-        #        print(j)
 
     def draw_outline(self, ax):
         for i in self.sides:
@@ -57,11 +54,19 @@ class Voxel:
                 i.draw_connection(ax)
 
     def find_strings(self):
-        for side, i in zip(self.sides, range(6)):
-            if side.get_direction() is not None:
-                self._string_sides.append((i, side))
+        if self.su2:
+            for side, i in zip(self.sides, range(6)):
+                if side.su2_node() is not None:
+                    self._string_sides.append((i, side))
+        else:
+            for side, i in zip(self.sides, range(6)):
+                if side.get_direction() is not None:
+                    self._string_sides.append((i, side))
 
     def connect_nodes(self):
+        if self.su2:
+            return self.su2_connect()
+
         sides = {0 : [], 1 : []}
         for i, j in self._string_sides:
             index = np.abs((i+1) % 2 - j._direction)
@@ -79,6 +84,16 @@ class Voxel:
             newly_connected.append(i)
             newly_connected.append(j)
         return newly_connected
+
+    def su2_connect(self):
+        sides = [i[1] for i in self._string_sides]
+        random.shuffle(sides)
+        it = iter(sides)
+
+        assert len(sides) % 2 == 0
+        for i in it:
+            i.su2_connect_side(next(it))
+        return sides
 
     def get_string_nodes(self):
         return [i for _, i in self._string_sides]

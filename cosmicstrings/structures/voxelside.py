@@ -4,9 +4,11 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 
 
 class VSide:
+    _comb = {0:[0,0,-1], 1:[0,0,1],
+            2:[0,-1,0], 3:[0,1,0],
+            4:[-1,0,0], 5:[1,0,0]}
 
-    def __init__(self, corners, pos):
-        self.direction = 0
+    def __init__(self, corners, pos, su2):
         self.pos = pos
         self.parents = {}
 
@@ -18,6 +20,17 @@ class VSide:
 
     def get_direction(self):
         return self._find_direction()
+
+    def su2_node(self):
+        sum_product = 1
+        for i, j in zip([0, 1, 2, 3],
+                        [1, 2, 3, 0]):
+            a = self._corners[i].theta
+            b = self._corners[j].theta
+            sum_product *= np.dot(a, b)
+        if sum_product < 0:
+            self._direction = 1
+        return self._direction
 
     @lru_cache(None)
     def _find_direction(self):
@@ -63,9 +76,43 @@ class VSide:
     def get_parent(self, i):
         return self.parents.get(i)
 
+    def get_parent_center(self):
+        dr = self._direction
+        parent = self.parents.get(dr)
+        diff = 0.5
+        if parent is None:
+            parent = self.parents.get(dr^1)
+            shift = self._comb[parent[0]]
+            vertp = parent[1].verts[0].pos
+            ret = [vertp[i] + shift[i] + diff for i in range(3)]
+            return ret
+        else:
+            corner = parent[1].verts[0]
+            ret = [i + diff for i in corner.pos]
+            return ret
+
     def connect_side(self, side):
         self._connections[0] = side
         side._connections[1] = self
+
+    def su2_connect_side(self, side):
+        self._su2_flipflop(side)
+        side._su2_flipflop(self, receiver=True)
+
+    def _su2_flipflop(self, side, receiver=False):
+        i = 1; j = 0
+        #if receiver:
+        #    i = 1
+        #    j = 0
+
+        if self._connections[i] is None:
+            self._connections[i] = side
+
+        elif self._connections[j] is None:
+            self._connections[j] = side
+
+        else:
+            raise
 
     def get_connections(self):
         return self._connections
@@ -74,7 +121,6 @@ class VSide:
         for i, j in zip(range(4), range(4)):
             self._corners[i].theta = side._corners[j].theta
 
-    @lru_cache(None)
     def _get_coords(self):
         X, Y, Z = [], [], []
         for i in [*self._corners, self._corners[0]]:
@@ -93,6 +139,20 @@ class VSide:
     def __str__(self):
         return "VSide pos: {} {} {}".format(*self.pos)
 
+    def __sub__(self, othr):
+        return [self.pos[i] - othr.pos[i] for i in range(3)]
+
     def __hash__(self):
         return hash(str(self.pos))
+
+class tVSide(VSide):  # text VSide
+
+    def __init__(self, pos, parent_center):
+        self.pos = pos
+        self._corners = None
+        self._parent_center = parent_center
+    
+    def get_parent_center(self):
+        return self._parent_center
+
 

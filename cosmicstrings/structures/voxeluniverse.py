@@ -6,8 +6,12 @@ import itertools
 import resource
 import numpy as np
 
+# DEBUG
+import code
 
-def build_3d_grid(shape, obj):
+from cosmicstrings.io import StringIO
+
+def build_3d_grid(shape, obj, su2):
     print("\nBuidling '{}':".format(obj))
     xrow = []
     for i in range(shape[0]):
@@ -16,27 +20,37 @@ def build_3d_grid(shape, obj):
         for j in range(shape[1]):
             zrow = []
             for k in range(shape[2]):
-                zrow.append(obj([i, j, k]))
+                zrow.append(obj([i, j, k], su2))
             yrow.append(zrow)
         xrow.append(yrow)
     print(" - Generating slice {} of {}".format(shape[0], shape[0]))
     print(" - Done!")
     return xrow
 
+
 def print_memory_usage():
     print("Memory usage at {} M".format(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1000**2))
 
 
 class VUniverse:
+    '''
+    Voxel Universe class.
+    Constructor builds the 3d grid.
 
-    def __init__(self, shape):
+    :param shape: [x, y, z] integers
+    :type shape: list/tuple
+    '''
+
+    def __init__(self, shape, su2=False):
         print("Creating universe...")
         print_memory_usage()
-        self.mapping = build_3d_grid(shape, Voxel)
-        self.vertices = build_3d_grid([i + 1 for i in shape], Vertex)
+        self.mapping = build_3d_grid(shape, Voxel, su2)
+        self.vertices = build_3d_grid([i + 1 for i in shape], Vertex, su2)
         self.shape = shape
         self.strings = []
         print_memory_usage()
+
+        self.su2 = su2
 
     def assign_vertices(self, periodic=False):
         self._periodic = periodic
@@ -71,7 +85,6 @@ class VUniverse:
 
     def draw_cubes(self, ax):
         for i in self.ordered_all_voxels():
-            # print(i)
             i.draw_outline(ax)
 
     def draw_connections(self, ax):
@@ -95,12 +108,19 @@ class VUniverse:
         nodes = set(nodes)
         print("Found {} connections".format(len(nodes)))
         print_memory_usage()
-        starts = [node for node in nodes if node.get_connections()[0] is None]
+
+        if self.su2:
+            starts = [node for node in nodes if any([i is None for i in node.get_connections()])]
+
+        else:
+            starts = [node for node in nodes if node.get_connections()[0] is None]
 
         print("\nConnecting simple strings objects together...")
         to_remove = self._build_strings(starts)     # linear strings
         print_memory_usage()
 
+        if self.su2:
+            to_remove = set(to_remove)
         for i in to_remove:
             nodes.remove(i)
 
@@ -144,7 +164,6 @@ class VUniverse:
             i.calc_loop()
         self.strings = strings
 
-
     def _build_strings(self, starts):
         used_nodes = []
         count = 0
@@ -154,7 +173,10 @@ class VUniverse:
             if start in used_nodes:
                 continue
             s = CString(start)
-            s.build_string()
+            if self.su2:
+                s.build_su2_string()
+            else:
+                s.build_string()
             self.strings.append(s)
             used_nodes += s.get_map()
         print(" - Node {} of {} connected".format(count, len(starts)))
@@ -171,37 +193,8 @@ class VUniverse:
             for s in self.strings:
                 s.draw(ax)
 
-    def classify_strings(self):
-        loops = []
-        non_loop = []
-        loop_lengths = []
-        non_loop_lengths = []
-        for i in self.strings:
-            if i.is_loop():
-                loop_lengths.append(len(i))
-                loops.append(i)
-            else:
-                non_loop_lengths.append(len(i))
-                non_loop.append(i)
-
-        loop_lengths = np.array(loop_lengths, dtype=float)
-        non_loop_lengths = np.array(non_loop_lengths, dtype=float)
-
-        print("\n\nFound        {} strings;".format(len(self.strings)))
-        print("Of which     {} are loops.".format(len(loops)))
-        try:
-            print("")
-            print("Lengths :: non-loop")
-            print("             {} mean".format(np.mean(non_loop_lengths)))
-            print("             {} max".format(np.max(non_loop_lengths)))
-            print("             {} min".format(np.min(non_loop_lengths)))
-            print("")
-            print("Lengths :: loops")
-            print("             {} mean".format(np.mean(loop_lengths)))
-            print("             {} max".format(np.max(loop_lengths)))
-            print("             {} min".format(np.min(loop_lengths)))
-        except:
-            pass
+    def save_state(self):
+        StringIO.save_strings(self.strings)
 
     def ordered_all_voxels(self):
         for i in self.mapping:
