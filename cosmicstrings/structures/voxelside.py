@@ -77,7 +77,7 @@ class VSide:
         return self.parents.get(i)
 
     def get_parent_center(self):
-        dr = self._direction
+        dr = self._find_direction           # TODO wont work for SU(2)
         parent = self.parents.get(dr)
         diff = 0.5
         if parent is None:

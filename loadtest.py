@@ -5,7 +5,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-os.environ["DATA_FILE"] = 'data/raw_5/20_normal_SU2_test.dat'
+os.environ["DATA_FILE"] = 'data/raw_1/100_normal_test.dat'
 os.environ["PROC_SAVE_PATH"] = "data/proc/"
 
 stringdat, dim = StringIO.load_strings()

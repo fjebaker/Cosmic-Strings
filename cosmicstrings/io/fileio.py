@@ -122,11 +122,7 @@ class StringIO:
 		for key, item in data.items():
 			x = list_to_fmt(item[0])
 			y = list_to_fmt(item[1])
-			if len(item) == 3:
-				yerr = list_to_fmt(item[2])
-				line = "**{}*{}*{}*{}".format(key, x, y, yerr)
-			else:
-				line = "**{}*{}*{}".format(key, x, y)
+			line = "**{}*{}*{}".format(key, x, y)
 			output += line
 		fname = "_proc.".join(os.path.split(os.environ["DATA_FILE"])[-1].split("."))
 		with open(os.path.join(
@@ -137,20 +133,14 @@ class StringIO:
 	@staticmethod
 	def load_processed_data(file_path):
 		retdata = {}
-		str_to_list = lambda s: [float(i) for i in s.split(",")]
+		str_to_list = lambda s, fun: [fun(float(i)) for i in s.split(",")]
 		with open(file_path, 'r') as f:
 			data = f.read().split("\n")
 		values = [i for i in data[-1].split("**") if i is not '']
 		for i in values:
 			i = i.split("*")
 			key = i[0]
-			vals = [str_to_list(i[1]), str_to_list(i[2])]	#x, y
-			try:
-				yerr = i[3]
-			except:
-				pass
-			else:
-				vals.append(str_to_list(yerr))
+			vals = [str_to_list(i[1], int), str_to_list(i[2], lambda x: x)]	#x, y
 			retdata[key] = vals
 		return retdata
 

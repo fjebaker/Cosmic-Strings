@@ -1,12 +1,14 @@
 import code
 
-
 class CString:
 
     def __init__(self, start):
         self._current = start
         self._map = [start]
         self._loop = False
+
+    def reverse(self):
+        self._map = list(reversed(self._map))
 
     def build_string(self):
         while True:

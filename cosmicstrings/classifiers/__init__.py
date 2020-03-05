@@ -3,6 +3,7 @@ from cosmicstrings.classifiers.loop import LoopClassifier
 from cosmicstrings.classifiers.line import LineClassifier
 from cosmicstrings.classifiers.mutual import DiffMapError
 from cosmicstrings.io import StringIO
+from cosmicstrings.classifiers.merger import PMerge
 import cosmicstrings.classifiers.visualise as vis
 import statistics as stats
 import inspect
@@ -27,6 +28,37 @@ class Classifier():
 		self.lines.classify()
 		print("\nCalculation complete.")
 		# exit(1)
+
+	def lhist_all(self):
+		pool = self.loops.strings + self.lines.strings
+		x, y = self._lhist(pool)
+		self._save_function_data(x, y)
+
+	def lhist_loops(self):
+		pool = self.loops.strings
+		x, y = self._lhist(pool)
+		self._save_function_data(x, y)
+
+	def lhist_lines(self):
+		pool = self.lines.strings
+		x, y = self._lhist(pool)
+		self._save_function_data(x, y)
+
+	def _lhist(self, pool):
+		dat = {}
+		for i in pool:
+			l = len(i)
+			if l in dat:
+				dat[l] += 1
+			else:
+				dat[l] = 1
+		x = []
+		y = []
+		for i, j in dat.items():
+			x.append(i)
+			y.append(j)
+		return x, y
+		
 
 	def _save_function_data(self, *dat):
 		index = str(inspect.stack()[1].function)

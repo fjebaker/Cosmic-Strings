@@ -142,23 +142,37 @@ class VUniverse:
             print()
 
     def _loop_periodic(self):
+        print("Looping periodic strings into CStringL...")
         strings_deck = {}
         for i in self.strings:
             strings_deck[str(i.get_start())] = i
+            strings_deck[str(i.get_end())] = i
 
         strings = []
         used = []
         for i in self.strings:
             if i in used:
                 continue
+            #print("i   {}".format(hex(id(i))))
+            #print("i.C\t{}".format(str(i.get_start())))
             while True:
                 j = strings_deck[str(i.get_conjugate_end(self.shape))]
+                used.append(j)
                 if i == j and type(i) is CStringL:
                     break
-                used.append(j)
+                if self.su2:
+                    if j.get_start() == i.get_conjugate_end(self.shape):
+                        pass
+                    else:
+                        j.reverse()
+                #print("\t->\t\t{}".format(str(j.get_start())))
                 i = i.connect(j)
-                strings_deck[str(i.get_start)] = i
+                #print("\t--\t\t{}\t{}".format(str(i.get_end()), str(j.get_end())))
+                strings_deck[str(i.get_start())] = i
+                strings_deck[str(i.get_end())] = i
             strings.append(i)
+
+        code.interact(local=locals())
 
         for i in strings:
             i.calc_loop()
