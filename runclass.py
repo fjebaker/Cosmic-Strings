@@ -53,7 +53,8 @@ def pipeconfig(PIPE):
 		PIPE.add(lambda: CLASS.plotvol2surf())
 		PIPE.add(lambda: CLASS.plotperim2dens(maxp=ENDN))
 		PIPE.add(lambda: CLASS.plotlength2dens(maxp=ENDN))
-		PIPE.add(lambda: CLASS.list())
+		PIPE.add(lambda: CLASS.lhist_lines())
+		PIPE.add(lambda: CLASS.lhist_loops())
 	else:
 		if args.l2R:
 			PIPE.add(lambda: CLASS.plotl2(startn=MINL, endn=ENDN))

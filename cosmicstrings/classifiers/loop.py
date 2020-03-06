@@ -19,6 +19,20 @@ class LoopClassifier(_BaseClass):
 		#print(x, y)
 		return x, y
 
+	def criticalR(self):
+		counter = {}
+		for i in self.strings:
+			l = int(sum(LoopClassifier.extent_v(i)))
+			if l in counter:
+				counter[l] += 1
+			else:
+				counter[l] = 1
+		ve = []
+		for k, v in counter.items():
+			if v < 4:
+				ve.append(k)
+		return min(ve) 
+
 	def xy_vol2surf(self):
 		x, y = [], []
 		for i in self.strings:

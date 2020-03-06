@@ -21,13 +21,19 @@ class Classifier():
 		self._fdata = []
 
 	def calculate(self):
+		print("·-"*30 + '·')
 		print("Starting calculate method for all strings:\n")
 		print("Classifying loops...")
 		self.loops.classify()
 		print("Classifying lines...")
 		self.lines.classify()
 		print("\nCalculation complete.")
-		# exit(1)
+		print("\tN_open / N_closed \t= \t{}".format(len(self.lines.strings) / len(self.loops.strings)))
+		lopen = self.lines.get_total_length()
+		lclosed = self.loops.get_total_length()
+		print("\tFraction open f_open \t=\t{}".format(1 - lclosed/lopen))
+		print("\tRc value\t\t\t=\t{}".format(self.loops.criticalR()))
+		print("·-"*30 + '·')
 
 	def lhist_all(self):
 		pool = self.loops.strings + self.lines.strings

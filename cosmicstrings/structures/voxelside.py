@@ -2,7 +2,6 @@ import numpy as np
 from functools import lru_cache
 from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
 
-
 class VSide:
     _comb = {0:[0,0,-1], 1:[0,0,1],
             2:[0,-1,0], 3:[0,1,0],
@@ -77,7 +76,7 @@ class VSide:
         return self.parents.get(i)
 
     def get_parent_center(self):
-        dr = self._find_direction           # TODO wont work for SU(2)
+        dr = self._direction
         parent = self.parents.get(dr)
         diff = 0.5
         if parent is None:

@@ -21,4 +21,8 @@ class Pipeline:
 				try:
 					i()
 				except Exception as e:
-					raise e
+					print("PIPE ERROR")
+					print("\t[!] function = '{}'".format(i))
+					print("\t[-] error: {}".format(str(e)))
+					print("\t[+] error not fatal.")
+					

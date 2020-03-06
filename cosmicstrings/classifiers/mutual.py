@@ -28,6 +28,12 @@ class _BaseClass:
 			resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1000**2))
 		print()
 
+	def get_total_length(self):
+		count = 0
+		for i in self.strings:
+			count += len(i)
+		return count
+
 	def avg_displacement(self, n):
 		disp = self.avg_displacements(n)
 		return stats.mean(disp), stats.stdev(disp)

@@ -11,51 +11,65 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 	x = np.log10(x)
 	y = np.log10(y)
 
+	yerr = np.log10(np.abs(y)) / (y * np.log(10)) * yerr
+
 	plt.figure()
 
+	label=""
+	print("-"*50)
 	if title is not "":
-		print("Title = '{}'".format(title))
+		print(title)
 		plt.title(title)
-
 	if yerr is not None or xerr is not None:
 		yerr = np.array(yerr)
 		yerr = 1./(y * np.log(10)) * yerr
 
 		f = lambda B, x: B[0] * x + B[1]
 		model = ODR.Model(f)
-		data = ODR.RealData(x, y, sy=yerr)
+
+		# adapt
+		xd = np.array(x)
+		yd = np.array(y)
+		ind = np.where(np.logical_and(np.greater_equal(xd, 0.602), np.less_equal(xd, 1.8)))
+		xd = xd[ind]
+		yd = yd[ind]
+		yerrd=yerr[ind]
+
+		data = ODR.RealData(xd, yd, sy=yerrd)
 		odr = ODR.ODR(data, model, beta0 = [1, 1])
 		out = odr.run()
 		msd, csd = out.sd_beta
 		m, c = out.beta.copy()
-		print("m = {0:.5} err {2:.5}\nc = {1:.5} err {3:.5}".format(m, c, msd, csd))
+		print("m  = {0:.4} \t+/-   {2:.4}\nc  = {1:.4} \t+/-   {3:.4}".format(m, c, msd, csd))
 		d = 1/float(m)
-		A = 10**(-c*m)
+		A = 10**(-c*d)
 		sd = m**(-2) * msd
-		print("d = {0:.5} err {1:.5}".format(d, sd))
-		print("A = {0:.5} err {1:.5}".format(A, A**2 * np.sqrt(c**2 * sd**2 + d**2 * csd**2)))
-		print("A2 = {0:.5} err {1:.5}".format(10**c, A**2 * csd))
+		print("d  = {0:.4} \t+/-   {1:.4}".format(d, sd))
+		print("A  = {0:.4} \t+/-   {1:.4}\t(inverse rel)".format(A, A**2 * np.sqrt(c**2 * sd**2 + d**2 * csd**2)))
+		print("A2 = {0:.4} \t+/-   {1:.4}\t(normal rel)".format(10**c, A**2 * csd))
 		plt.errorbar(x, y, ms=3, fmt='x', yerr=yerr, capsize=3, c='k', lw=1)
 
-		label = "m={0:.2f}, c={1:.2f}".format(m, c, A, d)
+		#label = "m={0:.2f}, c={1:.2f}".format(m, c, A, d)
 
 	else:
 		m, c = np.linalg.lstsq(np.vstack([x, np.ones(len(x))]).T, y, rcond=None)[0]
-		print("m = {0:.5}, c = {1:.5}".format(m, 10**c))
+		print("m = {0:.4}, c = {1:.4}".format(m, 10**c))
 		d = 1/float(m)
 		A = 10**(-c/float(m))
-		print("d = {0:.5}".format(d))
-		print("A = {0:.5}".format(A))
+		print("d = {0:.4}".format(d))
+		print("A = {0:.4}".format(A))
 		plt.scatter(x, y, s=3, marker='x')
-		label = "m={0:.2f}, c={1:.2f}".format(m, c)
+		#label = "m={0:.2f}, c={1:.2f}".format(m, c)
+
+	print("-"*50)
 
 	if xlabel is not "":
 		plt.xlabel(xlabel)
 	if ylabel is not "":
 		plt.ylabel(ylabel)
-	plt.plot(x, m*x + c, 'r', label=label, lw=1)
+	plt.plot(xd, m*xd + c, 'r', label=label, lw=1)
 	plt.grid()
-	plt.legend()
+	#plt.legend()
 
 def histogram(x1, y1, yerr1, x2, y2, yerr2, bins=10):
 	plt.figure()
@@ -95,7 +109,7 @@ class MPlot:
 	def plotvol2surf(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))
 		y, yerr = dat
-		_log_log_plot(x, y, r"Loop perimeter $R$ vs $V/S$", "Log (loop perimeter)", "Log (loop vol2surf)", yerr=yerr)
+		_log_log_plot(x, y, r"Loop perimeter $R$ vs $V/S$", "Log (loop perimeter)", r"Log (loop $V/S$)", yerr=yerr)
 
 	def plotperim2dens(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))

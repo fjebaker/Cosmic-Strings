@@ -41,6 +41,8 @@ parser.add_argument('--seed', type=int, default=[random.randrange(sys.maxsize)],
 parser.add_argument('--plot', nargs='*', choices=['voxels', 'conn', 'differ'], metavar='OPTION', help="Plot controls: 'differ' to colour closed and open strings differently, 'conn' to include connections, 'voxels' to include outlines of voxels.")
 parser.add_argument('--save_dir', type=str, default=['data/raw_4'], nargs=1, help="DATA_FILE save directory. Default is '/data/raw.'")
 
+parser.add_argument('-n', type=str, default=[''], nargs=1, help="String to append to file name.")
+
 args = parser.parse_args()
 
 # GLOBALS
@@ -50,6 +52,9 @@ SU2 = args.su2
 PERIODIC = args.periodic
 SEED = args.seed[0]
 SAVE_DIR = args.save_dir[0].strip('/')
+NCOUNT = args.n[0]
+if NCOUNT != '':
+	NCOUNT = '_' + NCOUNT
 
 PIPE = Pipeline()
 
@@ -63,7 +68,7 @@ def setup():
 	TIME = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 	GAUGE = 'SU2' if SU2 else 'U1'
 	# TODO os.environ["LOG_FILE"] = "data/testlog.log"
-	os.environ["DATA_FILE"] = "{}/{}_{}_{}_test.dat".format(SAVE_DIR, DIM, "periodic" if PERIODIC else "normal", GAUGE)
+	os.environ["DATA_FILE"] = "{}/{}_{}_{}{}.dat".format(SAVE_DIR, DIM, "periodic" if PERIODIC else "normal", GAUGE, NCOUNT)
 
 	dim = [DIM for i in range(3)]
 	StringIO.format_new_string_save(TIME, SEED, DIM, PERIODIC, GAUGE)
