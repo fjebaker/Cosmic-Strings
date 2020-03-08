@@ -30,12 +30,12 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 		# adapt
 		xd = np.array(x)
 		yd = np.array(y)
-		ind = np.where(np.logical_and(np.greater_equal(xd, 0.602), np.less_equal(xd, 1.8)))
+		ind = np.where(np.logical_and(np.greater_equal(xd, 0.602), np.less_equal(xd, 1.6)))
 		xd = xd[ind]
 		yd = yd[ind]
 		yerrd=yerr[ind]
 
-		data = ODR.RealData(xd, yd, sy=yerrd)
+		data = ODR.RealData(x, y, sy=yerrd)
 		odr = ODR.ODR(data, model, beta0 = [1, 1])
 		out = odr.run()
 		msd, csd = out.sd_beta
@@ -47,7 +47,7 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 		print("d  = {0:.4} \t+/-   {1:.4}".format(d, sd))
 		print("A  = {0:.4} \t+/-   {1:.4}\t(inverse rel)".format(A, A**2 * np.sqrt(c**2 * sd**2 + d**2 * csd**2)))
 		print("A2 = {0:.4} \t+/-   {1:.4}\t(normal rel)".format(10**c, A**2 * csd))
-		plt.errorbar(x, y, ms=3, fmt='x', yerr=yerr, capsize=3, c='k', lw=1)
+		plt.errorbar(x, y, ms=3, fmt='x', yerr=yerr, capsize=3, c='k', lw=1, alpha=.8)
 
 		#label = "m={0:.2f}, c={1:.2f}".format(m, c, A, d)
 
@@ -67,7 +67,7 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 		plt.xlabel(xlabel)
 	if ylabel is not "":
 		plt.ylabel(ylabel)
-	plt.plot(xd, m*xd + c, 'r', label=label, lw=1)
+	plt.plot(x, m*x + c, 'r', label=label, lw=1)
 	plt.grid()
 	#plt.legend()
 

@@ -32,8 +32,8 @@ parser.add_argument('--vol2surf', action='store_true', help="Volume against surf
 parser.add_argument('--p2dens', action='store_true', help="Perimeter R vs density.")
 parser.add_argument('--l2dens', action='store_true', help="Length l vs density.")
 parser.add_argument('--hist', action='store_true', help="Histogram of string length.")
-parser.add_argument('--maxl', nargs=1, type=int, default=[20])
-parser.add_argument('--minl', nargs=1, type=int, default=[2])
+parser.add_argument('--maxl', nargs=1, type=int, default=[20], help="Maximum length of string to use.")
+parser.add_argument('--minl', nargs=1, type=int, default=[2], help="Minimum length of string to use.")
 
 parser.add_argument('--plot', action='store_true', help="Show plots after calculation.")
 
