@@ -6,12 +6,17 @@ import inspect
 def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 	if all(i == 0 for i in yerr):
 		yerr = None
+	else:
+		y = np.array(y)
+		yerr = np.array(yerr)
+		yerr = np.log10(np.abs(y)) / (y * np.log(10)) * yerr
+
 
 	# PLOTTING CODE
 	x = np.log10(x)
 	y = np.log10(y)
 
-	yerr = np.log10(np.abs(y)) / (y * np.log(10)) * yerr
+	#yerr = np.log10(np.abs(y)) / (y * np.log(10)) * yerr
 
 	plt.figure()
 
@@ -35,7 +40,7 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 		yd = yd[ind]
 		yerrd=yerr[ind]
 
-		data = ODR.RealData(x, y, sy=yerrd)
+		data = ODR.RealData(xd, yd, sy=yerrd)
 		odr = ODR.ODR(data, model, beta0 = [1, 1])
 		out = odr.run()
 		msd, csd = out.sd_beta
@@ -43,7 +48,7 @@ def _log_log_plot(x, y, title="", xlabel="", ylabel="", xerr=None, yerr=None):
 		print("m  = {0:.4} \t+/-   {2:.4}\nc  = {1:.4} \t+/-   {3:.4}".format(m, c, msd, csd))
 		d = 1/float(m)
 		A = 10**(-c*d)
-		sd = m**(-2) * msd
+		sd = m**(-1) * msd
 		print("d  = {0:.4} \t+/-   {1:.4}".format(d, sd))
 		print("A  = {0:.4} \t+/-   {1:.4}\t(inverse rel)".format(A, A**2 * np.sqrt(c**2 * sd**2 + d**2 * csd**2)))
 		print("A2 = {0:.4} \t+/-   {1:.4}\t(normal rel)".format(10**c, A**2 * csd))
@@ -104,17 +109,17 @@ class MPlot:
 	def plotperimeter(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))
 		y, yerr = dat
-		_log_log_plot(x, y, r"Loop perimeter $R$ vs length $l$", "Log (loop perimeter)", "Log (length)", yerr=yerr)
+		_log_log_plot(x, y, r"Loop perimeter $P$ vs length $l$", "Log (loop perimeter)", "Log (length)", yerr=yerr)
 
 	def plotvol2surf(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))
 		y, yerr = dat
-		_log_log_plot(x, y, r"Loop perimeter $R$ vs $V/S$", "Log (loop perimeter)", r"Log (loop $V/S$)", yerr=yerr)
+		_log_log_plot(x, y, r"Loop perimeter $P$ vs $V/S$", "Log (loop perimeter)", r"Log (loop $V/S$)", yerr=yerr)
 
 	def plotperim2dens(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))
 		y, yerr = dat
-		_log_log_plot(x, y, r"Loop perimeter $R$ vs density $n$", "Log (loop perimeter)", "Log (loop density)", yerr=yerr)
+		_log_log_plot(x, y, r"Loop perimeter $P$ vs density $n$", "Log (loop perimeter)", "Log (loop density)", yerr=yerr)
 
 	def plotlength2dens(self, *a, **kw):
 		x, dat = self.pm.retrieve(str(inspect.stack()[0][3]))

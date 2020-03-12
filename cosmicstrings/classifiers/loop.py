@@ -40,6 +40,10 @@ class LoopClassifier(_BaseClass):
 			x.append(n1 + n2 + n3)
 			v2s = (n1 * n2 * n3) / (2 * ((n1 * n2) + (n1 * n3) + (n2 * n3)))
 			y.append(v2s)
+
+		#import json
+		#with open("tempout.txt", 'w') as f:
+		#	f.write(json.dumps([x, y]))
 		return x, y
 
 	def xy_perim2dens(self, maxp=None):

@@ -27,9 +27,9 @@ parser.add_argument('-a', action='store_true', help="Run all classification rout
 parser.add_argument('-o', '--output_dir', type=str, help="Output directory for the save file. Will not save if this flag is not set.")
 
 parser.add_argument('--l2R', action='store_true', help="Length l against displacement R.")
-parser.add_argument('--perimeter', action='store_true', help="Perimeter of closed strings R vs length l.")
+parser.add_argument('--perimeter', action='store_true', help="Perimeter of closed strings P vs length l.")
 parser.add_argument('--vol2surf', action='store_true', help="Volume against surface area.")
-parser.add_argument('--p2dens', action='store_true', help="Perimeter R vs density.")
+parser.add_argument('--p2dens', action='store_true', help="Perimeter P vs density.")
 parser.add_argument('--l2dens', action='store_true', help="Length l vs density.")
 parser.add_argument('--hist', action='store_true', help="Histogram of string length.")
 parser.add_argument('--maxl', nargs=1, type=int, default=[20], help="Maximum length of string to use.")

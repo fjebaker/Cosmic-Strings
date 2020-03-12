@@ -172,7 +172,7 @@ class VUniverse:
                 strings_deck[str(i.get_end())] = i
             strings.append(i)
 
-        code.interact(local=locals())
+        # code.interact(local=locals())
 
         for i in strings:
             i.calc_loop()
